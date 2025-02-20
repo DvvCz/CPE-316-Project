@@ -18,6 +18,9 @@
 /* USER CODE END Header */
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
+#include "lib/ttt.hpp"
+#include <stdio.h>
+#include <string.h>
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
@@ -90,7 +93,16 @@ int main(void)
   MX_GPIO_Init();
   MX_USART2_UART_Init();
   /* USER CODE BEGIN 2 */
-
+  auto b = new Board();
+  b->setTile(0, 0, tile_state_t::o);
+  b->setTile(0, 1, tile_state_t::x);
+  b->setTile(0, 2, tile_state_t::o);
+  b->setTile(1, 0, tile_state_t::x);
+  b->setTile(1, 1, tile_state_t::x);
+  b->setTile(1, 2, tile_state_t::o);
+  b->setTile(2, 0, tile_state_t::x);
+  b->setTile(2, 1, tile_state_t::o);
+  b->setTile(2, 2, tile_state_t::x);
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -99,7 +111,10 @@ int main(void)
   {
     /* USER CODE END WHILE */
     [&]() {
-      HAL_UART_Transmit(&huart2, (uint8_t *)"C++ Test\r\n", 11, HAL_MAX_DELAY);
+      char buffer[100];
+      snprintf(buffer, sizeof(buffer), "State: %d\r\n", b->solveState());
+
+      HAL_UART_Transmit(&huart2, (uint8_t*)buffer, strlen(buffer), 1000);
       HAL_Delay(500);
     }();
     /* USER CODE BEGIN 3 */
