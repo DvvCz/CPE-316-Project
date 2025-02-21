@@ -1,37 +1,39 @@
 #include "msp2807.hpp"
 
-MSP2807::Controller::Controller(SPI_HandleTypeDef* spiHandle, const LCDPins lcdPins, const TouchPins touchPins) {
-  this->spiHandle = spiHandle;
+MSP2807::Controller::Controller(SPI_HandleTypeDef* lcdSpi, SPI_HandleTypeDef* touchSpi, LCDPins lcdPins, const TouchPins touchPins) {
+  this->lcdSpi = lcdSpi;
+  this->touchSpi = touchSpi;
+
   this->lcdPins = lcdPins;
   this->touchPins = touchPins;
 }
 
-void MSP2807::Controller::spiWrite(const uint8_t* data, const uint16_t size) {
-  HAL_SPI_Transmit(this->spiHandle, data, size, HAL_MAX_DELAY);
+void MSP2807::Controller::spiWrite(SPI_HandleTypeDef* spi, const uint8_t* data, const uint16_t size) {
+  HAL_SPI_Transmit(spi, data, size, HAL_MAX_DELAY);
 }
 
-void MSP2807::Controller::spiWriteU8(uint8_t data) {
-  this->spiWrite(&data, 1);
+void MSP2807::Controller::spiWriteU8(SPI_HandleTypeDef* spi, const uint8_t data) {
+  this->spiWrite(spi, &data, 1);
 }
 
-void MSP2807::Controller::spiWriteU16(uint16_t data) {
-  this->spiWriteU8(data >> 8); // hi
-  this->spiWriteU8(data & 0xFF); // lo
+void MSP2807::Controller::spiWriteU16(SPI_HandleTypeDef* spi, const uint16_t data) {
+  this->spiWriteU8(spi, data >> 8); // hi
+  this->spiWriteU8(spi, data & 0xFF); // lo
 }
 
-void MSP2807::Controller::spiRead(uint8_t* data, uint16_t size) {
-  HAL_SPI_Receive(this->spiHandle, data, size, HAL_MAX_DELAY);
+void MSP2807::Controller::spiRead(SPI_HandleTypeDef* spi, uint8_t* data, uint16_t size) {
+  HAL_SPI_Receive(spi, data, size, HAL_MAX_DELAY);
 }
 
-uint8_t MSP2807::Controller::spiReadU8() {
+uint8_t MSP2807::Controller::spiReadU8(SPI_HandleTypeDef* spi) {
   uint8_t out;
-  this->spiRead(&out, 1);
+  this->spiRead(spi, &out, 1);
   return out;
 }
 
-uint16_t MSP2807::Controller::spiReadU16() {
+uint16_t MSP2807::Controller::spiReadU16(SPI_HandleTypeDef* spi) {
   uint16_t out;
-  this->spiRead((uint8_t*)&out, 2);
+  this->spiRead(spi, (uint8_t*)&out, 2);
   return out;
 }
 
@@ -51,22 +53,22 @@ void MSP2807::Controller::setDCMode(const DCMode mode) {
 
 void MSP2807::Controller::writeCommandU8(const uint8_t command) {
   this->setDCMode(DCMode::Command);
-  this->spiWriteU8(command);
+  this->spiWriteU8(this->lcdSpi, command);
 }
 
 void MSP2807::Controller::writeCommandU16(const uint16_t command) {
   this->setDCMode(DCMode::Command);
-  this->spiWriteU16(command);
+  this->spiWriteU16(this->lcdSpi, command);
 }
 
 void MSP2807::Controller::writeDataU8(const uint8_t data) {
   this->setDCMode(DCMode::Data);
-  this->spiWriteU8(data);
+  this->spiWriteU8(this->lcdSpi, data);
 }
 
 void MSP2807::Controller::writeDataU16(const uint16_t data) {
   this->setDCMode(DCMode::Data);
-  this->spiWriteU16(data);
+  this->spiWriteU16(this->lcdSpi, data);
 }
 
 void MSP2807::Controller::setAddrWindow(const uint16_t x0, const uint16_t y0, const uint16_t x1, const uint16_t y1) {

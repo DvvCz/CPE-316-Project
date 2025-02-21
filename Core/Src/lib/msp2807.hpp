@@ -94,22 +94,24 @@ enum DCMode {
 
 class Controller {
 private:
-  SPI_HandleTypeDef* spiHandle;
+  SPI_HandleTypeDef* lcdSpi;
+  SPI_HandleTypeDef* touchSpi;
+
   LCDPins lcdPins;
   TouchPins touchPins;
 
   void setDCMode(const DCMode mode);
 
-  void spiWrite(const uint8_t* data, const uint16_t size);
-  void spiWriteU8(const uint8_t data);
-  void spiWriteU16(const uint16_t data);
+  void spiWrite(SPI_HandleTypeDef* spi, const uint8_t* data, const uint16_t size);
+  void spiWriteU8(SPI_HandleTypeDef* spi, const uint8_t data);
+  void spiWriteU16(SPI_HandleTypeDef* spi, const uint16_t data);
 
-  void spiRead(uint8_t* data, uint16_t size);
-  [[nodiscard]] uint8_t spiReadU8();
-  [[nodiscard]]uint16_t spiReadU16();
+  void spiRead(SPI_HandleTypeDef* spi, uint8_t* data, uint16_t size);
+  [[nodiscard]] uint8_t spiReadU8(SPI_HandleTypeDef* spi);
+  [[nodiscard]]uint16_t spiReadU16(SPI_HandleTypeDef* spi);
 
 public:
-  Controller(SPI_HandleTypeDef* spiHandle, const LCDPins lcdPins, const TouchPins touchPins);
+  Controller(SPI_HandleTypeDef* lcdSpi, SPI_HandleTypeDef* touchSpi, const LCDPins lcdPins, const TouchPins touchPins);
 
   void init();
   void reset();
