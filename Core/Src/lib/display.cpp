@@ -1,49 +1,46 @@
-#include "msp2807.hpp"
+#include "display.hpp"
 
-MSP2807::Controller::Controller(SPI_HandleTypeDef* lcdSpi, SPI_HandleTypeDef* touchSpi, LCDPins lcdPins, const TouchPins touchPins) {
+Display::Controller::Controller(SPI_HandleTypeDef* spi, LCDPins pins) {
   this->lcdSpi = lcdSpi;
-  this->touchSpi = touchSpi;
-
   this->lcdPins = lcdPins;
-  this->touchPins = touchPins;
 }
 
-void MSP2807::Controller::spiWrite(SPI_HandleTypeDef* spi, const uint8_t* data, const uint16_t size) {
-  HAL_SPI_Transmit(spi, data, size, HAL_MAX_DELAY);
+void Display::Controller::spiWrite(const uint8_t* data, const uint16_t size) {
+  HAL_SPI_Transmit(this->lcdSpi, data, size, HAL_MAX_DELAY);
 }
 
-void MSP2807::Controller::spiWriteU8(SPI_HandleTypeDef* spi, const uint8_t data) {
-  this->spiWrite(spi, &data, 1);
+void Display::Controller::spiWriteU8(const uint8_t data) {
+  this->spiWrite(&data, 1);
 }
 
-void MSP2807::Controller::spiWriteU16(SPI_HandleTypeDef* spi, const uint16_t data) {
-  this->spiWriteU8(spi, data >> 8); // hi
-  this->spiWriteU8(spi, data & 0xFF); // lo
+void Display::Controller::spiWriteU16(const uint16_t data) {
+  this->spiWriteU8(data >> 8); // hi
+  this->spiWriteU8(data & 0xFF); // lo
 }
 
-void MSP2807::Controller::spiRead(SPI_HandleTypeDef* spi, uint8_t* data, uint16_t size) {
-  HAL_SPI_Receive(spi, data, size, HAL_MAX_DELAY);
+void Display::Controller::spiRead(uint8_t* data, uint16_t size) {
+  HAL_SPI_Receive(this->lcdSpi, data, size, HAL_MAX_DELAY);
 }
 
-uint8_t MSP2807::Controller::spiReadU8(SPI_HandleTypeDef* spi) {
+uint8_t Display::Controller::spiReadU8() {
   uint8_t out;
-  this->spiRead(spi, &out, 1);
+  this->spiRead(&out, 1);
   return out;
 }
 
-uint16_t MSP2807::Controller::spiReadU16(SPI_HandleTypeDef* spi) {
+uint16_t Display::Controller::spiReadU16() {
   uint16_t out;
-  this->spiRead(spi, (uint8_t*)&out, 2);
+  this->spiRead((uint8_t*)&out, 2);
   return out;
 }
 
-void MSP2807::Controller::reset() {
+void Display::Controller::reset() {
   HAL_GPIO_WritePin(this->lcdPins.resetPort, this->lcdPins.resetPin, GPIO_PIN_RESET);
   HAL_Delay(10);
   HAL_GPIO_WritePin(this->lcdPins.resetPort, this->lcdPins.resetPin, GPIO_PIN_SET);
 }
 
-void MSP2807::Controller::setDCMode(const DCMode mode) {
+void Display::Controller::setDCMode(const DCMode mode) {
   if (mode == DCMode::Data) {
     HAL_GPIO_WritePin(this->lcdPins.dcPort, this->lcdPins.dcPin, GPIO_PIN_SET);
   } else {
@@ -51,27 +48,27 @@ void MSP2807::Controller::setDCMode(const DCMode mode) {
   }
 }
 
-void MSP2807::Controller::writeCommandU8(const uint8_t command) {
+void Display::Controller::writeCommandU8(const uint8_t command) {
   this->setDCMode(DCMode::Command);
-  this->spiWriteU8(this->lcdSpi, command);
+  this->spiWriteU8(command);
 }
 
-void MSP2807::Controller::writeCommandU16(const uint16_t command) {
+void Display::Controller::writeCommandU16(const uint16_t command) {
   this->setDCMode(DCMode::Command);
-  this->spiWriteU16(this->lcdSpi, command);
+  this->spiWriteU16(command);
 }
 
-void MSP2807::Controller::writeDataU8(const uint8_t data) {
+void Display::Controller::writeDataU8(const uint8_t data) {
   this->setDCMode(DCMode::Data);
-  this->spiWriteU8(this->lcdSpi, data);
+  this->spiWriteU8(data);
 }
 
-void MSP2807::Controller::writeDataU16(const uint16_t data) {
+void Display::Controller::writeDataU16(const uint16_t data) {
   this->setDCMode(DCMode::Data);
-  this->spiWriteU16(this->lcdSpi, data);
+  this->spiWriteU16(data);
 }
 
-void MSP2807::Controller::setAddrWindow(const uint16_t x0, const uint16_t y0, const uint16_t x1, const uint16_t y1) {
+void Display::Controller::setAddrWindow(const uint16_t x0, const uint16_t y0, const uint16_t x1, const uint16_t y1) {
   this->writeCommandU16(ILI9341_COLADDRSET);
   this->writeDataU16(x0);
   this->writeDataU16(x1);
@@ -81,7 +78,7 @@ void MSP2807::Controller::setAddrWindow(const uint16_t x0, const uint16_t y0, co
   this->writeDataU16(y1);
 }
 
-void MSP2807::Controller::drawRect(const uint16_t x, const uint16_t y, const uint16_t w, const uint16_t h, const uint16_t color) {
+void Display::Controller::drawRect(const uint16_t x, const uint16_t y, const uint16_t w, const uint16_t h, const uint16_t color) {
   this->setAddrWindow(x, y, x + w - 1, y + h - 1);
 
   this->writeCommandU16(ILI9341_MEMORYWRITE);
@@ -128,7 +125,7 @@ uint8_t initCommands[] = {
   CMD(ILI9341_DISPLAYON)
 };
 
-void MSP2807::Controller::init() {
+void Display::Controller::init() {
   this->reset();
 
   int len = sizeof(initCommands) / sizeof(uint8_t);

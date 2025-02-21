@@ -22,7 +22,7 @@
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 #include "lib/ttt.hpp"
-#include "lib/msp2807.hpp"
+#include "lib/display.hpp"
 #include <cstdio>
 #include <cstring>
 /* USER CODE END Includes */
@@ -111,7 +111,7 @@ int main(void)
   b->setTile(2, 1, tile_state_t::o);
   b->setTile(2, 2, tile_state_t::x);
 
-  auto msp = new MSP2807::Controller(&hspi2, MSP2807::LCDPins {}, MSP2807::TouchPins {});
+  auto msp = new Display::Controller(&hspi2, Display::LCDPins {});
   /* USER CODE END 2 */
 
   /* Infinite loop */
