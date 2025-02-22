@@ -1,6 +1,7 @@
 {
     "editor.formatOnSave": false,
     "files.associations": {
-        "display.hpp": "c"
+        "display.hpp": "c",
+        "main.h": "c"
     }
 }

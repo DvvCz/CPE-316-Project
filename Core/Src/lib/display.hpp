@@ -7,6 +7,8 @@
 
 #include "main.h"
 
+#include <optional>
+
 namespace Display {
 struct LCDPins {
   GPIO_TypeDef* mosiPort;
@@ -18,8 +20,8 @@ struct LCDPins {
   GPIO_TypeDef* sClkPort;
   uint16_t sClkPin;
 
-  GPIO_TypeDef* csPort;
-  uint16_t csPin;
+  std::optional<GPIO_TypeDef*> csPort;
+  std::optional<uint16_t> csPin;
 
   GPIO_TypeDef* resetPort;
   uint16_t resetPin;

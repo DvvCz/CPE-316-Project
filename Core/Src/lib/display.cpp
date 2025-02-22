@@ -51,10 +51,18 @@ void Display::Controller::setDCMode(const DCMode mode) {
 }
 
 void Display::Controller::setCSMode(const CSMode mode) {
+  auto csPort = this->lcdPins.csPort;
+  auto csPin = this->lcdPins.csPin;
+
+  if (!csPort.has_value() || !csPin.has_value()) {
+    /* Using hardware CS (NSS) */
+    return;
+  }
+
   if (mode == CSMode::Active) {
-    HAL_GPIO_WritePin(this->lcdPins.csPort, this->lcdPins.csPin, GPIO_PIN_RESET);
+    HAL_GPIO_WritePin(csPort.value(), csPin.value(), GPIO_PIN_RESET);
   } else {
-    HAL_GPIO_WritePin(this->lcdPins.csPort, this->lcdPins.csPin, GPIO_PIN_SET);
+    HAL_GPIO_WritePin(csPort.value(), csPin.value(), GPIO_PIN_SET);
   }
 }
 

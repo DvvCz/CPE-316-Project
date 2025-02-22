@@ -26,9 +26,6 @@ void App::init() {
     .sClkPort = LCD_SCK_GPIO_Port,
     .sClkPin = LCD_SCK_Pin,
 
-    .csPort = LCD_CS_GPIO_Port,
-    .csPin = LCD_CS_Pin,
-
     .resetPort = LCD_RESET_GPIO_Port,
     .resetPin = LCD_RESET_Pin,
 
