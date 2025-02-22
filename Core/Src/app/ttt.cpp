@@ -26,9 +26,6 @@ void App::init() {
     .sClkPort = LCD_SCK_GPIO_Port,
     .sClkPin = LCD_SCK_Pin,
 
-    .csPort = LCD_CS_GPIO_Port,
-    .csPin = LCD_CS_Pin,
-
     .resetPort = LCD_RESET_GPIO_Port,
     .resetPin = LCD_RESET_Pin,
 
@@ -39,29 +36,49 @@ void App::init() {
 
   lcd.init();
 
+  uint16_t width = Display::WIDTH;
+  uint16_t height = Display::HEIGHT;
+
+  uint16_t R = Display::rgb8To565(255, 0, 0);
+  uint16_t B = Display::rgb8To565(0, 0, 0);
+
+  uint16_t checkeredTexture[64] = {
+    R, R, R, R, B, B, B, B,
+    R, R, R, R, B, B, B, B,
+    R, R, R, R, B, B, B, B,
+    R, R, R, R, B, B, B, B,
+
+    B, B, B, B, R, R, R, R,
+    B, B, B, B, R, R, R, R,
+    B, B, B, B, R, R, R, R,
+    B, B, B, B, R, R, R, R
+  };
+
+  lcd.drawRectTexturedTiling(0, 0, width, height, checkeredTexture, 8, 8);
+
   while (true) {
     lcd.setRotation(Display::Landscape);
 
-    lcd.drawRect(0, 0, Display::WIDTH, Display::HEIGHT, Display::rgb8To565(255, 0, 0));
-    lcd.drawRect(0, 0, Display::WIDTH, Display::HEIGHT, Display::rgb8To565(0, 255, 0));
-    lcd.drawRect(0, 0, Display::WIDTH, Display::HEIGHT, Display::rgb8To565(0, 0, 255));
+    lcd.drawRect(0, 0, width, height, Display::rgb8To565(255, 0, 0));
+    lcd.drawRect(0, 0, width, height, Display::rgb8To565(0, 255, 0));
+    lcd.drawRect(0, 0, width, height, Display::rgb8To565(0, 0, 255));
 
     lcd.setRotation(Display::Portrait);
 
-    lcd.drawRect(0, 0, Display::HEIGHT, Display::WIDTH, Display::rgb8To565(255, 0, 0));
-    lcd.drawRect(0, 0, Display::HEIGHT, Display::WIDTH, Display::rgb8To565(0, 255, 0));
-    lcd.drawRect(0, 0, Display::HEIGHT, Display::WIDTH, Display::rgb8To565(0, 0, 255));
+    lcd.drawRect(0, 0, height, width, Display::rgb8To565(255, 0, 0));
+    lcd.drawRect(0, 0, height, width, Display::rgb8To565(0, 255, 0));
+    lcd.drawRect(0, 0, height, width, Display::rgb8To565(0, 0, 255));
 
     lcd.setRotation(Display::ReverseLandscape);
 
-    lcd.drawRect(0, 0, Display::WIDTH, Display::HEIGHT, Display::rgb8To565(0, 255, 255));
-    lcd.drawRect(0, 0, Display::WIDTH, Display::HEIGHT, Display::rgb8To565(255, 0, 255));
-    lcd.drawRect(0, 0, Display::WIDTH, Display::HEIGHT, Display::rgb8To565(255, 255, 0));
+    lcd.drawRect(0, 0, width, height, Display::rgb8To565(0, 255, 255));
+    lcd.drawRect(0, 0, width, height, Display::rgb8To565(255, 0, 255));
+    lcd.drawRect(0, 0, width, height, Display::rgb8To565(255, 255, 0));
 
     lcd.setRotation(Display::ReversePortrait);
 
-    lcd.drawRect(0, 0, Display::HEIGHT, Display::WIDTH, Display::rgb8To565(0, 255, 255));
-    lcd.drawRect(0, 0, Display::HEIGHT, Display::WIDTH, Display::rgb8To565(255, 0, 255));
-    lcd.drawRect(0, 0, Display::HEIGHT, Display::WIDTH, Display::rgb8To565(255, 255, 0));
+    lcd.drawRect(0, 0, height, width, Display::rgb8To565(0, 255, 255));
+    lcd.drawRect(0, 0, height, width, Display::rgb8To565(255, 0, 255));
+    lcd.drawRect(0, 0, height, width, Display::rgb8To565(255, 255, 0));
   }
 }

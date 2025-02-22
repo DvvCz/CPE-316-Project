@@ -7,6 +7,8 @@
 
 #include "main.h"
 
+#include <optional>
+
 namespace Display {
 struct LCDPins {
   GPIO_TypeDef* mosiPort;
@@ -18,8 +20,8 @@ struct LCDPins {
   GPIO_TypeDef* sClkPort;
   uint16_t sClkPin;
 
-  GPIO_TypeDef* csPort;
-  uint16_t csPin;
+  std::optional<GPIO_TypeDef*> csPort;
+  std::optional<uint16_t> csPin;
 
   GPIO_TypeDef* resetPort;
   uint16_t resetPin;
@@ -129,6 +131,8 @@ public:
 
   void drawRect(const uint16_t x, const uint16_t y, const uint16_t w, const uint16_t h, const uint16_t color);
   void drawRectTextured(const uint16_t x, const uint16_t y, const uint16_t w, const uint16_t h, const uint16_t* colors);
+  void drawRectTexturedStretch(const uint16_t x, const uint16_t y, const uint16_t w, const uint16_t h, const uint16_t* colors, const uint16_t textureWidth, const uint16_t textureHeight);
+  void drawRectTexturedTiling(const uint16_t x, const uint16_t y, const uint16_t w, const uint16_t h, const uint16_t* colors, const uint16_t textureWidth, const uint16_t textureHeight);
 };
 
 } // namespace Display
