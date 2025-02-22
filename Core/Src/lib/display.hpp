@@ -131,6 +131,8 @@ public:
 
   void drawRect(const uint16_t x, const uint16_t y, const uint16_t w, const uint16_t h, const uint16_t color);
   void drawRectTextured(const uint16_t x, const uint16_t y, const uint16_t w, const uint16_t h, const uint16_t* colors);
+  void drawRectTexturedStretch(const uint16_t x, const uint16_t y, const uint16_t w, const uint16_t h, const uint16_t* colors, const uint16_t textureWidth, const uint16_t textureHeight);
+  void drawRectTexturedTiling(const uint16_t x, const uint16_t y, const uint16_t w, const uint16_t h, const uint16_t* colors, const uint16_t textureWidth, const uint16_t textureHeight);
 };
 
 } // namespace Display

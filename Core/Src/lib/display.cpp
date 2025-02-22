@@ -112,6 +112,52 @@ void Display::Controller::setAddrWindow(const uint16_t x0, const uint16_t y0, co
   this->writeDataU16(y1);
 }
 
+void Display::Controller::drawRectTexturedStretch( /* clang-format off */
+  const uint16_t x,
+  const uint16_t y,
+  const uint16_t w,
+  const uint16_t h,
+  const uint16_t* colors,
+  const uint16_t textureWidth,
+  const uint16_t textureHeight
+) { /* clang-format on */
+  this->setAddrWindow(x, y, x + w - 1, y + h - 1);
+
+  this->writeCommandU16(ILI9341_MEMORYWRITE);
+
+  for (uint16_t y = 0; y < h; y++) {
+    for (uint16_t x = 0; x < w; x++) {
+      uint16_t texX = (x * textureWidth) / w;
+      uint16_t texY = (y * textureHeight) / h;
+
+      this->writeDataU16(colors[texX + texY * textureWidth]);
+    }
+  }
+}
+
+void Display::Controller::drawRectTexturedTiling( /* clang-format off */
+  const uint16_t x,
+  const uint16_t y,
+  const uint16_t w,
+  const uint16_t h,
+  const uint16_t* colors,
+  const uint16_t textureWidth,
+  const uint16_t textureHeight
+) { /* clang-format on */
+  this->setAddrWindow(x, y, x + w - 1, y + h - 1);
+
+  this->writeCommandU16(ILI9341_MEMORYWRITE);
+
+  for (uint16_t y = 0; y < h; y++) {
+    for (uint16_t x = 0; x < w; x++) {
+      uint16_t texX = x % textureWidth;
+      uint16_t texY = y % textureHeight;
+
+      this->writeDataU16(colors[texX + texY * textureWidth]);
+    }
+  }
+}
+
 void Display::Controller::drawRectTextured( /* clang-format off */
   const uint16_t x,
   const uint16_t y,
@@ -119,12 +165,7 @@ void Display::Controller::drawRectTextured( /* clang-format off */
   const uint16_t h,
   const uint16_t* colors
 ) { /* clang-format on */
-  this->setAddrWindow(x, y, x + w - 1, y + h - 1);
-
-  this->writeCommandU16(ILI9341_MEMORYWRITE);
-  for (int i = 0; i < w * h; i++) {
-    this->writeDataU16(colors[i]);
-  }
+  this->drawRectTexturedTiling(x, y, w, h, colors, w, h);
 }
 
 void Display::Controller::drawRect( /* clang-format off */
@@ -134,12 +175,7 @@ void Display::Controller::drawRect( /* clang-format off */
   const uint16_t h,
   const uint16_t color
 ) { /* clang-format on */
-  this->setAddrWindow(x, y, x + w - 1, y + h - 1);
-
-  this->writeCommandU16(ILI9341_MEMORYWRITE);
-  for (int i = 0; i < w * h; i++) {
-    this->writeDataU16(color);
-  }
+  this->drawRectTexturedTiling(x, y, w, h, &color, 1, 1);
 }
 
 void Display::Controller::setRotation(const Rotation r) {
