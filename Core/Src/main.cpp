@@ -21,10 +21,7 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-#include "lib/ttt.hpp"
-#include "lib/display.hpp"
-#include <cstdio>
-#include <cstring>
+#include "app/ttt.hpp"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -100,18 +97,7 @@ int main(void)
   MX_SPI2_Init();
   MX_SPI3_Init();
   /* USER CODE BEGIN 2 */
-  auto b = new Board();
-  b->setTile(0, 0, tile_state_t::o);
-  b->setTile(0, 1, tile_state_t::x);
-  b->setTile(0, 2, tile_state_t::o);
-  b->setTile(1, 0, tile_state_t::x);
-  b->setTile(1, 1, tile_state_t::x);
-  b->setTile(1, 2, tile_state_t::o);
-  b->setTile(2, 0, tile_state_t::x);
-  b->setTile(2, 1, tile_state_t::o);
-  b->setTile(2, 2, tile_state_t::x);
-
-  auto msp = new Display::Controller(&hspi2, Display::LCDPins {});
+  App::init();
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -119,13 +105,7 @@ int main(void)
   while (1)
   {
     /* USER CODE END WHILE */
-    [&]() {
-      char buffer[100];
-      snprintf(buffer, sizeof(buffer), "State: %d\r\n", b->solveState());
 
-      HAL_UART_Transmit(&huart2, (uint8_t*)buffer, strlen(buffer), 1000);
-      HAL_Delay(500);
-    }();
     /* USER CODE BEGIN 3 */
   }
   /* USER CODE END 3 */
@@ -199,10 +179,10 @@ static void MX_SPI2_Init(void)
   hspi2.Instance = SPI2;
   hspi2.Init.Mode = SPI_MODE_MASTER;
   hspi2.Init.Direction = SPI_DIRECTION_1LINE;
-  hspi2.Init.DataSize = SPI_DATASIZE_4BIT;
+  hspi2.Init.DataSize = SPI_DATASIZE_8BIT;
   hspi2.Init.CLKPolarity = SPI_POLARITY_LOW;
   hspi2.Init.CLKPhase = SPI_PHASE_1EDGE;
-  hspi2.Init.NSS = SPI_NSS_HARD_INPUT;
+  hspi2.Init.NSS = SPI_NSS_SOFT;
   hspi2.Init.BaudRatePrescaler = SPI_BAUDRATEPRESCALER_2;
   hspi2.Init.FirstBit = SPI_FIRSTBIT_MSB;
   hspi2.Init.TIMode = SPI_TIMODE_DISABLE;
@@ -315,6 +295,9 @@ static void MX_GPIO_Init(void)
   /*Configure GPIO pin Output Level */
   HAL_GPIO_WritePin(LD2_GPIO_Port, LD2_Pin, GPIO_PIN_RESET);
 
+  /*Configure GPIO pin Output Level */
+  HAL_GPIO_WritePin(GPIOB, LCD_CS_Pin|LCD_RESET_Pin|LCD_DC_Pin, GPIO_PIN_RESET);
+
   /*Configure GPIO pin : B1_Pin */
   GPIO_InitStruct.Pin = B1_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_IT_FALLING;
@@ -327,6 +310,13 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(LD2_GPIO_Port, &GPIO_InitStruct);
+
+  /*Configure GPIO pins : LCD_CS_Pin LCD_RESET_Pin LCD_DC_Pin */
+  GPIO_InitStruct.Pin = LCD_CS_Pin|LCD_RESET_Pin|LCD_DC_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+  HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
 
 /* USER CODE BEGIN MX_GPIO_Init_2 */
 /* USER CODE END MX_GPIO_Init_2 */

@@ -4,6 +4,7 @@
       "name": "STM32",
       "includePath": [
         "Core/Inc",
+        "Core/Src/app",
         "Core/Src/lib",
         "Drivers/CMSIS/Device/ST/STM32L4xx/Include",
         "Drivers/CMSIS/Include",

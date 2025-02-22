@@ -36,6 +36,9 @@ extern "C" {
 
 /* Exported types ------------------------------------------------------------*/
 /* USER CODE BEGIN ET */
+extern UART_HandleTypeDef huart2;
+extern SPI_HandleTypeDef hspi2;
+extern SPI_HandleTypeDef hspi3;
 
 /* USER CODE END ET */
 
@@ -59,18 +62,36 @@ void Error_Handler(void);
 /* Private defines -----------------------------------------------------------*/
 #define B1_Pin GPIO_PIN_13
 #define B1_GPIO_Port GPIOC
+#define LCD_MOSI_Pin GPIO_PIN_3
+#define LCD_MOSI_GPIO_Port GPIOC
 #define USART_TX_Pin GPIO_PIN_2
 #define USART_TX_GPIO_Port GPIOA
 #define USART_RX_Pin GPIO_PIN_3
 #define USART_RX_GPIO_Port GPIOA
+#define TS_NSS_Pin GPIO_PIN_4
+#define TS_NSS_GPIO_Port GPIOA
 #define LD2_Pin GPIO_PIN_5
 #define LD2_GPIO_Port GPIOA
+#define LCD_SCK_Pin GPIO_PIN_10
+#define LCD_SCK_GPIO_Port GPIOB
+#define LCD_CS_Pin GPIO_PIN_12
+#define LCD_CS_GPIO_Port GPIOB
 #define TMS_Pin GPIO_PIN_13
 #define TMS_GPIO_Port GPIOA
 #define TCK_Pin GPIO_PIN_14
 #define TCK_GPIO_Port GPIOA
+#define TS_SCK_Pin GPIO_PIN_10
+#define TS_SCK_GPIO_Port GPIOC
+#define TS_MISO_Pin GPIO_PIN_11
+#define TS_MISO_GPIO_Port GPIOC
+#define TS_MOSI_Pin GPIO_PIN_12
+#define TS_MOSI_GPIO_Port GPIOC
 #define SWO_Pin GPIO_PIN_3
 #define SWO_GPIO_Port GPIOB
+#define LCD_RESET_Pin GPIO_PIN_5
+#define LCD_RESET_GPIO_Port GPIOB
+#define LCD_DC_Pin GPIO_PIN_6
+#define LCD_DC_GPIO_Port GPIOB
 
 /* USER CODE BEGIN Private defines */
 

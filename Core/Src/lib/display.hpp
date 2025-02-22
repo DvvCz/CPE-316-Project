@@ -28,7 +28,25 @@ struct LCDPins {
   uint16_t dcPin;
 };
 
+const uint16_t WIDTH = 240;
+const uint16_t HEIGHT = 320;
+
 enum DCMode { Data = 1, Command = 0 };
+enum CSMode { Active = 0, Idle = 1 };
+
+enum Rotation {
+  /* 0 degrees */
+  Landscape = 0,
+
+  /* 90 degrees */
+  Portrait = 1,
+
+  /* 180 degrees */
+  ReverseLandscape = 2,
+
+  /* 270 degrees */
+  ReversePortrait = 3
+};
 
 #define ILI9341_SOFTRESET 0x01
 #define ILI9341_SLEEPIN 0x10
@@ -74,14 +92,15 @@ enum DCMode { Data = 1, Command = 0 };
 #define ILI9341_MADCTL_BGR 0x08
 #define ILI9341_MADCTL_MH 0x04
 
+uint16_t rgb8To565(const uint8_t r, const uint8_t g, const uint8_t b);
+
 class Controller {
 private:
   SPI_HandleTypeDef* lcdSpi;
   SPI_HandleTypeDef* touchSpi;
 
-  LCDPins lcdPins;
-
   void setDCMode(const DCMode mode);
+  void setCSMode(const CSMode mode);
 
   void spiWrite(const uint8_t* data, const uint16_t size);
   void spiWriteU8(const uint8_t data);
@@ -93,6 +112,7 @@ private:
 
 public:
   Controller(SPI_HandleTypeDef* lcdSpi, const LCDPins lcdPins);
+  LCDPins lcdPins;
 
   void init();
   void reset();
@@ -104,7 +124,11 @@ public:
   void writeDataU16(const uint16_t data);
 
   void setAddrWindow(const uint16_t x0, const uint16_t y0, const uint16_t x1, const uint16_t y1);
+  void setRotation(const Rotation r);
+  void setInverted(const bool inverted);
+
   void drawRect(const uint16_t x, const uint16_t y, const uint16_t w, const uint16_t h, const uint16_t color);
+  void drawRectTextured(const uint16_t x, const uint16_t y, const uint16_t w, const uint16_t h, const uint16_t* colors);
 };
 
 } // namespace Display
