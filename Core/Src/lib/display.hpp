@@ -8,6 +8,7 @@
 #include "main.h"
 
 #include <optional>
+#include <tuple>
 
 namespace Display {
 struct LCDPins {
@@ -95,6 +96,8 @@ enum Rotation {
 #define ILI9341_MADCTL_MH 0x04
 
 uint16_t rgb8To565(const uint8_t r, const uint8_t g, const uint8_t b);
+std::tuple<uint8_t, uint8_t, uint8_t> rgb565To8(const uint16_t color);
+uint16_t mix(const uint16_t color1, const uint16_t color2, const float ratio);
 
 class Controller {
 private:
@@ -130,9 +133,14 @@ public:
   void setInverted(const bool inverted);
 
   void drawRect(const uint16_t x, const uint16_t y, const uint16_t w, const uint16_t h, const uint16_t color);
+
   void drawRectTextured(const uint16_t x, const uint16_t y, const uint16_t w, const uint16_t h, const uint16_t* colors);
+
   void drawRectTexturedStretch(const uint16_t x, const uint16_t y, const uint16_t w, const uint16_t h, const uint16_t* colors, const uint16_t textureWidth, const uint16_t textureHeight);
   void drawRectTexturedTiling(const uint16_t x, const uint16_t y, const uint16_t w, const uint16_t h, const uint16_t* colors, const uint16_t textureWidth, const uint16_t textureHeight);
+
+  void drawRectTexturedStretchMix(const uint16_t x, const uint16_t y, const uint16_t w, const uint16_t h, const uint16_t* colors, const uint16_t textureWidth, const uint16_t textureHeight, const uint16_t color);
+  void drawRectTexturedTilingMix(const uint16_t x, const uint16_t y, const uint16_t w, const uint16_t h, const uint16_t* colors, const uint16_t textureWidth, const uint16_t textureHeight, const uint16_t color);
 };
 
 } // namespace Display

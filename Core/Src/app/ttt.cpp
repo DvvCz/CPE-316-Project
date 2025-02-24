@@ -3,6 +3,7 @@
 #include "../lib/ttt.hpp"
 #include "../lib/display.hpp"
 #include "../lib/uart.hpp"
+#include "../lib/render.hpp"
 
 #include "main.h"
 
@@ -36,13 +37,12 @@ void App::init() {
 
   lcd.init();
 
-  uint16_t width = Display::WIDTH;
-  uint16_t height = Display::HEIGHT;
+  auto render = Render::LCDRenderer(&lcd);
 
-  uint16_t R = Display::rgb8To565(255, 0, 0);
-  uint16_t B = Display::rgb8To565(0, 0, 0);
+  auto R = Render::WHITE;
+  auto B = Render::BLACK;
 
-  uint16_t checkeredTexture[64] = {
+  Render::LCDColor checkeredTexture[] = {
     R, R, R, R, B, B, B, B,
     R, R, R, R, B, B, B, B,
     R, R, R, R, B, B, B, B,
@@ -54,31 +54,78 @@ void App::init() {
     B, B, B, B, R, R, R, R
   };
 
-  lcd.drawRectTexturedTiling(0, 0, width, height, checkeredTexture, 8, 8);
+  Render::LCDTexture texture = Render::LCDTexture::fromColors(checkeredTexture, 8, 8, Render::LCDTextureWrap::Tile, Render::LCDTextureBlend::Additive);
 
-  while (true) {
-    lcd.setRotation(Display::Landscape);
+  render.setRotation(Display::Landscape);
+  // render.setTexture(texture);
 
-    lcd.drawRect(0, 0, width, height, Display::rgb8To565(255, 0, 0));
-    lcd.drawRect(0, 0, width, height, Display::rgb8To565(0, 255, 0));
-    lcd.drawRect(0, 0, width, height, Display::rgb8To565(0, 0, 255));
+  auto red = Render::LCDColor::fromRgb8(255, 0, 0);
+  auto blue = Render::LCDColor::fromRgb8(0, 0, 255);
+  // auto purple = blue.mix(red, 0.5f);
 
-    lcd.setRotation(Display::Portrait);
+  int i = 0;
 
-    lcd.drawRect(0, 0, height, width, Display::rgb8To565(255, 0, 0));
-    lcd.drawRect(0, 0, height, width, Display::rgb8To565(0, 255, 0));
-    lcd.drawRect(0, 0, height, width, Display::rgb8To565(0, 0, 255));
+  render.setColor(blue);
 
-    lcd.setRotation(Display::ReverseLandscape);
+  render.drawCircleOutline(Display::WIDTH / 2, Display::HEIGHT / 2, 1, 200);
 
-    lcd.drawRect(0, 0, width, height, Display::rgb8To565(0, 255, 255));
-    lcd.drawRect(0, 0, width, height, Display::rgb8To565(255, 0, 255));
-    lcd.drawRect(0, 0, width, height, Display::rgb8To565(255, 255, 0));
+  // while (true) {
+  //   auto rectW = 25;
+  //   auto rectH = 25;
 
-    lcd.setRotation(Display::ReversePortrait);
+  //   auto centerW = Display::WIDTH / 2;
+  //   auto centerH = Display::HEIGHT / 2;
 
-    lcd.drawRect(0, 0, height, width, Display::rgb8To565(0, 255, 255));
-    lcd.drawRect(0, 0, height, width, Display::rgb8To565(255, 0, 255));
-    lcd.drawRect(0, 0, height, width, Display::rgb8To565(255, 255, 0));
-  }
+  //   render.setColor(Render::LCDColor::fromRgb8(i, 0, 0));
+  //   render.drawRect(centerW - rectW / 2, centerH - rectH / 2, rectW, rectH);
+
+  //   i = (i + 5) % 255;
+  // }
+
+
+  // uint16_t width = Display::WIDTH;
+  // uint16_t height = Display::HEIGHT;
+
+  // uint16_t R = Display::rgb8To565(255, 0, 0);
+  // uint16_t B = Display::rgb8To565(0, 0, 0);
+
+  // uint16_t checkeredTexture[64] = {
+  //   R, R, R, R, B, B, B, B,
+  //   R, R, R, R, B, B, B, B,
+  //   R, R, R, R, B, B, B, B,
+  //   R, R, R, R, B, B, B, B,
+
+  //   B, B, B, B, R, R, R, R,
+  //   B, B, B, B, R, R, R, R,
+  //   B, B, B, B, R, R, R, R,
+  //   B, B, B, B, R, R, R, R
+  // };
+
+  // lcd.drawRectTexturedTiling(0, 0, width, height, checkeredTexture, 8, 8);
+
+  // while (true) {
+  //   lcd.setRotation(Display::Landscape);
+
+  //   lcd.drawRect(0, 0, width, height, Display::rgb8To565(255, 0, 0));
+  //   lcd.drawRect(0, 0, width, height, Display::rgb8To565(0, 255, 0));
+  //   lcd.drawRect(0, 0, width, height, Display::rgb8To565(0, 0, 255));
+
+  //   lcd.setRotation(Display::Portrait);
+
+  //   lcd.drawRect(0, 0, height, width, Display::rgb8To565(255, 0, 0));
+  //   lcd.drawRect(0, 0, height, width, Display::rgb8To565(0, 255, 0));
+  //   lcd.drawRect(0, 0, height, width, Display::rgb8To565(0, 0, 255));
+
+  //   lcd.setRotation(Display::ReverseLandscape);
+
+  //   lcd.drawRect(0, 0, width, height, Display::rgb8To565(0, 255, 255));
+  //   lcd.drawRect(0, 0, width, height, Display::rgb8To565(255, 0, 255));
+  //   lcd.drawRect(0, 0, width, height, Display::rgb8To565(255, 255, 0));
+
+  //   lcd.setRotation(Display::ReversePortrait);
+
+  //   lcd.drawRect(0, 0, height, width, Display::rgb8To565(0, 255, 255));
+  //   lcd.drawRect(0, 0, height, width, Display::rgb8To565(255, 0, 255));
+  //   lcd.drawRect(0, 0, height, width, Display::rgb8To565(255, 255, 0));
+  // }
 }

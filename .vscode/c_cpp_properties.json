@@ -15,7 +15,7 @@
         "STM32L476xx",
         "USE_HAL_DRIVER"
       ],
-      "compilerPath": "/home/once/.config/Code/User/globalStorage/bmd.stm32-for-vscode/@xpack-dev-tools/arm-none-eabi-gcc/14.2.1-1.1.1/.content/bin/arm-none-eabi-g++"
+      "compilerPath": "/home/oncelock/.config/Code/User/globalStorage/bmd.stm32-for-vscode/@xpack-dev-tools/arm-none-eabi-gcc/14.2.1-1.1.1/.content/bin/arm-none-eabi-g++"
     }
   ],
   "version": 4
