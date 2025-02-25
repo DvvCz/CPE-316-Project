@@ -68,6 +68,10 @@ public:
   void drawRect(uint16_t x, uint16_t y, uint16_t width, uint16_t height);
   void drawLine(uint16_t x0, uint16_t y0, uint16_t x1, uint16_t y1);
   void drawCircleOutline(uint16_t x, uint16_t y, uint16_t radius, uint8_t thickness = 1);
+  void drawDiagonalLine(uint16_t x, uint16_t y, uint16_t size, bool topLeftToBottomRight, Render::LCDColor color);
+  void drawX(uint16_t x, uint16_t y, uint16_t size, Render::LCDColor color);
+  void drawLine(uint16_t x0, uint16_t y0, uint16_t x1, uint16_t y1, uint16_t color);
+  void drawGrid();
 };
 
 }; // namespace Render

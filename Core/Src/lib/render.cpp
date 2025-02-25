@@ -25,18 +25,18 @@ void Render::LCDRenderer::drawRect(uint16_t x, uint16_t y, uint16_t width, uint1
 void Render::LCDRenderer::drawDiagonalLine(uint16_t x, uint16_t y, uint16_t size, bool topLeftToBottomRight, Render::LCDColor color) {
     if (topLeftToBottomRight) {
         //you can change if you want to draw diagonal going right or left with this bool
-        for (uint16_t i = 0; i < size; ++i) {
+        for (uint16_t i = 0; i < size; i++) {
             lcd->drawRect(x + i, y + i, 1, 1, color.as565());  // Draw each pixel along the diagonal individually
         }
     } else {
         // Draw top-right to bottom-left diagonal
-        for (uint16_t i = 0; i < size; ++i) {
+        for (uint16_t i = 0; i < size; i++) {
             lcd->drawRect(x + size - i - 1, y + i, 1, 1, color.as565());  // Draw each pixel along the diagonal individually
         }
     }
 }
 
-void Render::LCDRenderer::drawX(uint16_t x, uint16_t y, uint16_t size, Render::LCDColor color) {
+void Render::LCDRenderer::drawX(uint16_t x, uint16_t y, uint16_t size, Render::LCDColor color) { //coordinate input to this function will be the top left of the x
     // draw first diagonal left to right
     drawDiagonalLine(x, y, size, true, color);
 
