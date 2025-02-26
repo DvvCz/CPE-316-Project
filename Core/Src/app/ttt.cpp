@@ -4,6 +4,7 @@
 #include "../lib/display.hpp"
 #include "../lib/uart.hpp"
 #include "../lib/render.hpp"
+#include "../lib/touchscreen.hpp"
 
 #include "main.h"
 
@@ -28,6 +29,24 @@ Display::Controller lcd(&hspi2, {
 
 Render::LCDRenderer render(&lcd);
 
+Touchscreen* touchScreen = nullptr;
+
+#define DEBOUNCE_TIME 50
+
+uint32_t lastPressed = 0;
+
+extern "C" void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin) {
+  if (GPIO_Pin == TS_IRQ_Pin) {
+    auto now = HAL_GetTick();
+    if (now - lastPressed < DEBOUNCE_TIME) {
+      return;
+    }
+
+    lastPressed = now;
+    touchScreen->irqHook();
+  }
+}
+
 void App::init() {
   // auto b = new Board();
   // b->setTile(0, 0, tile_state_t::o);
@@ -39,6 +58,30 @@ void App::init() {
   // b->setTile(2, 0, tile_state_t::x);
   // b->setTile(2, 1, tile_state_t::o);
   // b->setTile(2, 2, tile_state_t::x);
+
+  auto touch = Touchscreen(&hspi3, TouchPins {
+    .clkPort = TS_SCK_GPIO_Port,
+    .clkPin = TS_SCK_Pin,
+
+    .csPort = TS_NSS_GPIO_Port,
+    .csPin = TS_NSS_Pin,
+
+    .dinPort = TS_MISO_GPIO_Port,
+    .dinPin = TS_MISO_Pin,
+
+    .doPort = TS_MOSI_GPIO_Port,
+    .doPin = TS_MOSI_Pin,
+
+    .irqPort = TS_IRQ_GPIO_Port,
+    .irqPin = TS_IRQ_Pin
+  });
+
+  touch.init();
+  touch.setCallback([](int x, int y) {
+    uartPrintf("Touch at %d, %d\r\n", x, y);
+  });
+
+  touchScreen = &touch;
 
   /* clang-format off */
   // auto lcd = Display::Controller(&hspi2, {

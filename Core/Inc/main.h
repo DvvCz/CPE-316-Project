@@ -92,6 +92,9 @@ void Error_Handler(void);
 #define LCD_RESET_GPIO_Port GPIOB
 #define LCD_DC_Pin GPIO_PIN_6
 #define LCD_DC_GPIO_Port GPIOB
+#define TS_IRQ_Pin GPIO_PIN_9
+#define TS_IRQ_GPIO_Port GPIOB
+#define TS_IRQ_EXTI_IRQn EXTI9_5_IRQn
 
 /* USER CODE BEGIN Private defines */
 
