@@ -2,3 +2,4 @@ Drivers/** linguist-generated
 Core/Inc/stm32* linguist-generated
 Core/Src/stm* linguist-generated
 Core/Src/sys* linguist-generated
+Makefile linguist-generated
