@@ -5,8 +5,8 @@
 
 // Touchscreen class definition
 Touchscreen::Touchscreen(SPI_HandleTypeDef* spi, TouchPins pins) {
-    this->touchSpi = spi;
-    this->touchPins = pins;
+    touchSpi = spi;
+    touchPins = pins;
 }
 
 // Initializes touchscreen (setup SPI)
@@ -17,13 +17,13 @@ void Touchscreen::init() {
 }
 
 void Touchscreen::setCallback(TouchCallback callback) {
-    this->callback = callback;
+    callback = callback;
 }
 
 // Reads data from touchscreen over SPI
 uint8_t Touchscreen::spiReadU8() {
     uint8_t data;
-    HAL_SPI_Receive(this->touchSpi, &data, 1, HAL_MAX_DELAY);
+    HAL_SPI_Receive(touchSpi, &data, 1, HAL_MAX_DELAY);
     return data;
 }
 
@@ -77,22 +77,22 @@ bool Touchscreen::isTouched() {
 
 void Touchscreen::irqHook() {
     // Check if IRQ pin is low (indicating touch)
-    if (this->isTouched()) {
-        if (this->callback.has_value()) {
-            uint16_t x = this->readTouchX();
-            uint16_t y = this->readTouchY();
-            (this->callback.value())(x, y);
+    if (isTouched()) {
+        if (callback.has_value()) {
+            uint16_t x = readTouchX();
+            uint16_t y = readTouchY();
+            (callback.value())(x, y);
         }
     }
 }
 
 // Helper functions to communicate via SPI
 void Touchscreen::spiWriteU8(uint8_t data) {
-    HAL_SPI_Transmit(this->touchSpi, &data, 1, HAL_MAX_DELAY);
+    HAL_SPI_Transmit(touchSpi, &data, 1, HAL_MAX_DELAY);
 }
 
 void Touchscreen::spiRead(TouchPins touchPins, uint8_t* data, uint16_t size) {
-    HAL_SPI_Receive(this->touchSpi, data, size, HAL_MAX_DELAY);
+    HAL_SPI_Receive(touchSpi, data, size, HAL_MAX_DELAY);
 }
 
 

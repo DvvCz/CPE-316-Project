@@ -97,7 +97,7 @@ int main(void)
   MX_SPI2_Init();
   MX_SPI3_Init();
   /* USER CODE BEGIN 2 */
-  App::init();
+  App().run();
   /* USER CODE END 2 */
 
   /* Infinite loop */

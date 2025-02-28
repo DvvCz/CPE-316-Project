@@ -1,7 +1,7 @@
 #include "render.hpp"
 
 Render::LCDRenderer::LCDRenderer(Display::Controller* lcd) {
-  this->lcd = lcd;
+  lcd = lcd;
 }
 
 void Render::LCDRenderer::drawRect(uint16_t x, uint16_t y, uint16_t width, uint16_t height) {
@@ -75,35 +75,31 @@ void drawSingleCircleOutline(Display::Controller* lcd, uint16_t x, uint16_t y, u
     }
 }
 
-void Render::LCDRenderer::drawLine(uint16_t x0, uint16_t y0, uint16_t x1, uint16_t y1, uint16_t color) { //this function only works for horizontal and vertical lines
+void Render::LCDRenderer::drawLine(uint16_t x0, uint16_t y0, uint16_t x1, uint16_t y1) { //this function only works for horizontal and vertical lines
     //horizontal lines
     if (y0 == y1) {
         for (uint16_t x = x0; x <= x1; x++) {
-            lcd->drawRect(x, y0, 1, 1, color);  // Draw each pixel in the horizontal line
+          this->drawRect(x, y0, 1, 1);
         }
     }
     // vertical line
     else if (x0 == x1) {
         for (uint16_t y = y0; y <= y1; y++) {
-            lcd->drawRect(x0, y, 1, 1, color);  // Draw each pixel in the vertical line
+          this->drawRect(x0, y, 1, 1);
         }
     }
 }
 
 
 void Render::LCDRenderer::drawGrid() { //maybe can change this to draw grid a bit differently if it looks weird
-    
     //draw horizontal lines
     drawLine(0, 80, 320, 80, currentColor.as565());
     drawLine(0, 160, 320, 160, currentColor.as565());
 
-
-
     // draw vertical lines, wont be exactly symmetrical because it is 320 pixels in x direction which is not divisible by 3 but likely wont be noticable
     drawLine(107, 0, 107, 240, currentColor.as565());
-    drawLine(214, 0, 214, 240. currentColor.as565());
+    drawLine(214, 0, 214, 240, currentColor.as565());
 }
-
 
 void Render::LCDRenderer::drawCircleOutline(uint16_t x, uint16_t y, uint16_t radius, uint8_t thickness) {
     for (uint8_t i = 0; i < thickness; i++) {
