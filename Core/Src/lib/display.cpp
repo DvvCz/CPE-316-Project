@@ -1,6 +1,19 @@
 #include "display.hpp"
 
 #include "uart.hpp"
+#include <functional>
+
+uint16_t Display::TexturePosition::stretching(uint16_t x, uint16_t y, uint16_t w, uint16_t h, uint16_t textureWidth, uint16_t textureHeight) {
+  return (x * textureWidth) / w + (y * textureHeight) / h * textureWidth;
+};
+
+uint16_t Display::TexturePosition::tiling(uint16_t x, uint16_t y, uint16_t w, uint16_t h, uint16_t textureWidth, uint16_t textureHeight) {
+  return (x % textureWidth) + (y % textureHeight) * textureWidth;
+};
+
+uint16_t Display::TextureColor::identity(const uint16_t* colors, uint16_t index) {
+  return colors[index];
+};
 
 Display::Controller::Controller(SPI_HandleTypeDef* spi, LCDPins pins) {
   lcdSpi = spi;
@@ -112,88 +125,31 @@ void Display::Controller::setAddrWindow(const uint16_t x0, const uint16_t y0, co
   this->writeDataU16(y1);
 }
 
-void Display::Controller::drawRectTexturedStretchMix( /* clang-format off */
-  const uint16_t x,
-  const uint16_t y,
-  const uint16_t w,
-  const uint16_t h,
-  const uint16_t* colors,
-  const uint16_t textureWidth,
-  const uint16_t textureHeight,
-  const uint16_t color
-) { /* clang-format on */
-  this->setAddrWindow(x, y, x + w - 1, y + h - 1);
-
-  this->writeCommandU16(ILI9341_MEMORYWRITE);
-
-  for (uint16_t y = 0; y < h; y++) {
-    for (uint16_t x = 0; x < w; x++) {
-      uint16_t texX = (x * textureWidth) / w;
-      uint16_t texY = (y * textureHeight) / h;
-
-      auto mixed = Display::mix(colors[texX + texY * textureWidth], color, 0.5f);
-      this->writeDataU16(mixed);
-    }
-  }
-}
-
-void Display::Controller::drawRectTexturedStretch( /* clang-format off */
-  const uint16_t x,
-  const uint16_t y,
-  const uint16_t w,
-  const uint16_t h,
-  const uint16_t* colors,
-  const uint16_t textureWidth,
-  const uint16_t textureHeight
-) { /* clang-format on */
-  this->drawRectTexturedStretchMix(x, y, w, h, colors, textureWidth, textureHeight, Display::rgb8To565(255, 255, 255));
-}
-
-void Display::Controller::drawRectTexturedTilingMix( /* clang-format off */
-  const uint16_t x,
-  const uint16_t y,
-  const uint16_t w,
-  const uint16_t h,
-  const uint16_t* colors,
-  const uint16_t textureWidth,
-  const uint16_t textureHeight,
-  const uint16_t color
-) { /* clang-format on */
-  this->setAddrWindow(x, y, x + w - 1, y + h - 1);
-
-  this->writeCommandU16(ILI9341_MEMORYWRITE);
-
-  for (uint16_t y = 0; y < h; y++) {
-    for (uint16_t x = 0; x < w; x++) {
-      uint16_t texX = x % textureWidth;
-      uint16_t texY = y % textureHeight;
-
-      auto mixed = Display::mix(colors[texX + texY * textureWidth], color, 0.5f);
-      this->writeDataU16(mixed);
-    }
-  }
-}
-
-void Display::Controller::drawRectTexturedTiling( /* clang-format off */
-  const uint16_t x,
-  const uint16_t y,
-  const uint16_t w,
-  const uint16_t h,
-  const uint16_t* colors,
-  const uint16_t textureWidth,
-  const uint16_t textureHeight
-) { /* clang-format on */
-  this->drawRectTexturedTilingMix(x, y, w, h, colors, textureWidth, textureHeight, Display::rgb8To565(255, 255, 255));
-}
-
 void Display::Controller::drawRectTextured( /* clang-format off */
   const uint16_t x,
   const uint16_t y,
   const uint16_t w,
   const uint16_t h,
-  const uint16_t* colors
+  const uint16_t* colors,
+  const std::optional<uint16_t> textureWidth,
+  const std::optional<uint16_t> textureHeight,
+  const Display::TexturePosition::Resolver positionResolver,
+  const Display::TextureColor::Resolver colorResolver
 ) { /* clang-format on */
-  this->drawRectTexturedTiling(x, y, w, h, colors, w, h);
+  this->setAddrWindow(x, y, x + w - 1, y + h - 1);
+  this->writeCommandU16(ILI9341_MEMORYWRITE);
+
+  auto texWidth = textureWidth.value_or(w);
+  auto texHeight = textureHeight.value_or(h);
+
+  for (uint16_t y = 0; y < h; y++) {
+    for (uint16_t x = 0; x < w; x++) {
+      uint16_t texIndex = positionResolver(x, y, w, h, texWidth, texHeight);
+      uint16_t texColor = colorResolver(colors, texIndex);
+
+      this->writeDataU16(texColor);
+    }
+  }
 }
 
 void Display::Controller::drawRect( /* clang-format off */
@@ -203,7 +159,7 @@ void Display::Controller::drawRect( /* clang-format off */
   const uint16_t h,
   const uint16_t color
 ) { /* clang-format on */
-  this->drawRectTexturedTiling(x, y, w, h, &color, 1, 1);
+  drawRectTextured(x, y, w, h, &color, 1, 1, Display::TexturePosition::tiling);
 }
 
 void Display::Controller::setRotation(const Rotation r) {
@@ -315,52 +271,4 @@ std::tuple<uint8_t, uint8_t, uint8_t> Display::rgb565To8(const uint16_t color) {
   uint8_t b = color & 0x1F;
 
   return std::make_tuple(r, g, b);
-}
-
-#define MIN(a, b) ((a) < (b) ? (a) : (b))
-
-static std::tuple<uint8_t, uint8_t, uint8_t, uint8_t> rgb8ToCmyk(const uint8_t r, const uint8_t g, const uint8_t b) {
-  uint8_t c = 255 - r;
-  uint8_t m = 255 - g;
-  uint8_t y = 255 - b;
-  uint8_t k = MIN(c, MIN(m, y));
-
-  return std::make_tuple(c, m, y, k);
-}
-
-static std::tuple<uint8_t, uint8_t, uint8_t> cmykToRgb8(const uint8_t c, const uint8_t m, const uint8_t y, const uint8_t k) {
-  uint8_t r = 255 - c - k;
-  uint8_t g = 255 - m - k;
-  uint8_t b = 255 - y - k;
-
-  return std::make_tuple(r, g, b);
-}
-
-static std::tuple<uint8_t, uint8_t, uint8_t, uint8_t> mixCmyk(const uint8_t c1, const uint8_t m1, const uint8_t y1, const uint8_t k1, const uint8_t c2, const uint8_t m2, const uint8_t y2, const uint8_t k2, const float t) {
-  uint8_t c = c1 * (1 - t) + c2 * t;
-  uint8_t m = m1 * (1 - t) + m2 * t;
-  uint8_t y = y1 * (1 - t) + y2 * t;
-  uint8_t k = k1 * (1 - t) + k2 * t;
-
-  return std::make_tuple(c, m, y, k);
-}
-
-static std::tuple<uint8_t, uint8_t, uint8_t> mixRgb8(const uint8_t r1, const uint8_t g1, const uint8_t b1, const uint8_t r2, const uint8_t g2, const uint8_t b2, const float t) {
-  auto [ c1, m1, y1, k1 ] = rgb8ToCmyk(r1, g1, b1);
-  auto [ c2, m2, y2, k2 ] = rgb8ToCmyk(r2, g2, b2);
-
-  auto [ c, m, y, k ] = mixCmyk(c1, m1, y1, k1, c2, m2, y2, k2, t);
-
-  return cmykToRgb8(c, m, y, k);
-}
-
-uint16_t Display::mix(const uint16_t c1, const uint16_t c2, const float t) {
-  auto [ r1, g1, b1 ] = Display::rgb565To8(c1);
-  auto [ r2, g2, b2 ] = Display::rgb565To8(c2);
-
-  float r = r1 * (1 - t) + r2 * t;
-  float g = g1 * (1 - t) + g2 * t;
-  float b = b1 * (1 - t) + b2 * t;
-
-  return Display::rgb8To565(r * 255, g * 255, b * 255);
 }

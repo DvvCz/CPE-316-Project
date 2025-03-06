@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../lib/ttt.hpp"
+#include "../lib/board.hpp"
 #include "../lib/render.hpp"
 #include "../lib/touchscreen.hpp"
 

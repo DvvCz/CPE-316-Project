@@ -4,7 +4,6 @@
         "display.hpp": "c",
         "main.h": "c"
     },
-    "cortex-debug.armToolchainPath": "/home/oncelock/.config/Code/User/globalStorage/bmd.stm32-for-vscode/@xpack-dev-tools/arm-none-eabi-gcc/14.2.1-1.1.1/.content/bin",
-    "cortex-debug.openocdPath": "/home/oncelock/.config/Code/User/globalStorage/bmd.stm32-for-vscode/@xpack-dev-tools/openocd/0.12.0-4.1/.content/bin/openocd",
-    "C_Cpp.errorSquiggles": "disabled"
+    "cortex-debug.armToolchainPath": "/home/once/.config/Code/User/globalStorage/bmd.stm32-for-vscode/@xpack-dev-tools/arm-none-eabi-gcc/14.2.1-1.1.1/.content/bin",
+    "cortex-debug.openocdPath": "/home/once/.config/Code/User/globalStorage/bmd.stm32-for-vscode/@xpack-dev-tools/openocd/0.12.0-4.1/.content/bin/openocd"
 }

@@ -9,6 +9,7 @@
 
 #include <optional>
 #include <tuple>
+#include <functional>
 
 namespace Display {
 struct LCDPins {
@@ -97,7 +98,20 @@ enum Rotation {
 
 uint16_t rgb8To565(const uint8_t r, const uint8_t g, const uint8_t b);
 std::tuple<uint8_t, uint8_t, uint8_t> rgb565To8(const uint16_t color);
-uint16_t mix(const uint16_t color1, const uint16_t color2, const float ratio);
+
+namespace TexturePosition {
+using Resolver = std::function<uint16_t(uint16_t x, uint16_t y, uint16_t w, uint16_t h, uint16_t textureWidth,
+                                        uint16_t textureHeight)>;
+
+uint16_t stretching(uint16_t x, uint16_t y, uint16_t w, uint16_t h, uint16_t textureWidth, uint16_t textureHeight);
+uint16_t tiling(uint16_t x, uint16_t y, uint16_t w, uint16_t h, uint16_t textureWidth, uint16_t textureHeight);
+} // namespace TexturePosition
+
+namespace TextureColor {
+using Resolver = std::function<uint16_t(const uint16_t* colors, uint16_t index)>;
+
+uint16_t identity(const uint16_t* colors, uint16_t index);
+} // namespace TextureColor
 
 class Controller {
 private:
@@ -134,13 +148,17 @@ public:
 
   void drawRect(const uint16_t x, const uint16_t y, const uint16_t w, const uint16_t h, const uint16_t color);
 
-  void drawRectTextured(const uint16_t x, const uint16_t y, const uint16_t w, const uint16_t h, const uint16_t* colors);
-
-  void drawRectTexturedStretch(const uint16_t x, const uint16_t y, const uint16_t w, const uint16_t h, const uint16_t* colors, const uint16_t textureWidth, const uint16_t textureHeight);
-  void drawRectTexturedTiling(const uint16_t x, const uint16_t y, const uint16_t w, const uint16_t h, const uint16_t* colors, const uint16_t textureWidth, const uint16_t textureHeight);
-
-  void drawRectTexturedStretchMix(const uint16_t x, const uint16_t y, const uint16_t w, const uint16_t h, const uint16_t* colors, const uint16_t textureWidth, const uint16_t textureHeight, const uint16_t color);
-  void drawRectTexturedTilingMix(const uint16_t x, const uint16_t y, const uint16_t w, const uint16_t h, const uint16_t* colors, const uint16_t textureWidth, const uint16_t textureHeight, const uint16_t color);
+  void drawRectTextured(
+    const uint16_t x,
+    const uint16_t y,
+    const uint16_t w,
+    const uint16_t h,
+    const uint16_t* colors,
+    const std::optional<uint16_t> textureWidth = std::nullopt,
+    const std::optional<uint16_t> textureHeight = std::nullopt,
+    const TexturePosition::Resolver positionResolver = TexturePosition::stretching,
+    const TextureColor::Resolver colorResolver = TextureColor::identity
+  );
 };
 
 } // namespace Display

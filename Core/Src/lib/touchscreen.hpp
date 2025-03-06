@@ -38,7 +38,7 @@ public:
 private:
   SPI_HandleTypeDef* touchSpi;
   TouchPins touchPins;
-  std::optional<TouchCallback> callback;
+  std::optional<TouchCallback> callback = std::nullopt;
 
   void write(uint8_t data);
   uint8_t read();

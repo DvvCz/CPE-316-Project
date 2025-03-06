@@ -3,8 +3,8 @@
 #include <optional>
 #include <cstdint>
 
-#define TTT_NUM_ROWS 3
-#define TTT_NUM_COLS 3
+#define BOARD_NUM_ROWS 3
+#define BOARD_NUM_COLS 3
 
 enum TileState {
     Empty,

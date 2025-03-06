@@ -1,7 +1,9 @@
 #include "render.hpp"
 
+#include "uart.hpp"
+
 Render::LCDRenderer::LCDRenderer(Display::Controller* lcd) {
-  lcd = lcd;
+  this->lcd = lcd;
 }
 
 void Render::LCDRenderer::drawRect(uint16_t x, uint16_t y, uint16_t width, uint16_t height) {
@@ -9,42 +11,18 @@ void Render::LCDRenderer::drawRect(uint16_t x, uint16_t y, uint16_t width, uint1
     auto currentTexture = this->currentTexture.value();
     switch (currentTexture.wrap) {
     case LCDTextureWrap::Fill:
-      lcd->drawRectTexturedStretchMix(x, y, width, height, currentTexture.data, currentTexture.width,
-                                   currentTexture.height, currentColor.as565());
+      lcd->drawRectTextured(x, y, width, height, currentTexture.data, currentTexture.width,
+                                   currentTexture.height, Display::TexturePosition::stretching);
       break;
     case LCDTextureWrap::Tile:
-      lcd->drawRectTexturedTilingMix(x, y, width, height, currentTexture.data, currentTexture.width,
-                                  currentTexture.height, currentColor.as565());
+      lcd->drawRectTextured(x, y, width, height, currentTexture.data, currentTexture.width,
+                                  currentTexture.height, Display::TexturePosition::tiling);
       break;
     }
   } else {
     lcd->drawRect(x, y, width, height, currentColor.as565());
   }
 }
-
-void Render::LCDRenderer::drawDiagonalLine(uint16_t x, uint16_t y, uint16_t size, bool topLeftToBottomRight, Render::LCDColor color) {
-    if (topLeftToBottomRight) {
-        //you can change if you want to draw diagonal going right or left with this bool
-        for (uint16_t i = 0; i < size; i++) {
-            lcd->drawRect(x + i, y + i, 1, 1, color.as565());  // Draw each pixel along the diagonal individually
-        }
-    } else {
-        // Draw top-right to bottom-left diagonal
-        for (uint16_t i = 0; i < size; i++) {
-            lcd->drawRect(x + size - i - 1, y + i, 1, 1, color.as565());  // Draw each pixel along the diagonal individually
-        }
-    }
-}
-
-void Render::LCDRenderer::drawX(uint16_t x, uint16_t y, uint16_t size, Render::LCDColor color) { //coordinate input to this function will be the top left of the x
-    // draw first diagonal left to right
-    drawDiagonalLine(x, y, size, true, color);
-
-    // draw second diagonal right to left
-    drawDiagonalLine(x + size - 1, y, size, false, color);
-}
-
-
 
 /*
     TODO: Could possibly split this into a cleaner rounded rectangle corner fn.
@@ -76,29 +54,32 @@ void drawSingleCircleOutline(Display::Controller* lcd, uint16_t x, uint16_t y, u
 }
 
 void Render::LCDRenderer::drawLine(uint16_t x0, uint16_t y0, uint16_t x1, uint16_t y1) { //this function only works for horizontal and vertical lines
-    //horizontal lines
-    if (y0 == y1) {
-        for (uint16_t x = x0; x <= x1; x++) {
-          this->drawRect(x, y0, 1, 1);
+    if (y0 == y1) { // Horizontal
+      drawRect(x0, y0, x1 - x0, 1);
+    } else if (x0 == x1) { // Vertical
+      drawRect(x0, y0, 1, y1 - y0);
+    } else {
+      // Bresenham's line algorithm for diagonal lines
+      int dx = abs(x1 - x0);
+      int dy = abs(y1 - y0);
+      int sx = x0 < x1 ? 1 : -1;
+      int sy = y0 < y1 ? 1 : -1;
+      int err = dx - dy;
+
+      while (true) {
+        lcd->drawRect(x0, y0, 1, 1, currentColor.as565());
+        if (x0 == x1 && y0 == y1) break;
+        int e2 = 2 * err;
+        if (e2 > -dy) {
+          err -= dy;
+          x0 += sx;
         }
-    }
-    // vertical line
-    else if (x0 == x1) {
-        for (uint16_t y = y0; y <= y1; y++) {
-          this->drawRect(x0, y, 1, 1);
+        if (e2 < dx) {
+          err += dx;
+          y0 += sy;
         }
+      }
     }
-}
-
-
-void Render::LCDRenderer::drawGrid() { //maybe can change this to draw grid a bit differently if it looks weird
-    //draw horizontal lines
-    drawLine(0, 80, 320, 80, currentColor.as565());
-    drawLine(0, 160, 320, 160, currentColor.as565());
-
-    // draw vertical lines, wont be exactly symmetrical because it is 320 pixels in x direction which is not divisible by 3 but likely wont be noticable
-    drawLine(107, 0, 107, 240, currentColor.as565());
-    drawLine(214, 0, 214, 240, currentColor.as565());
 }
 
 void Render::LCDRenderer::drawCircleOutline(uint16_t x, uint16_t y, uint16_t radius, uint8_t thickness) {

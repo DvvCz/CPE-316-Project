@@ -1,4 +1,4 @@
-#include "ttt.hpp"
+#include "board.hpp"
 
 std::optional<BoardState> tileToWinner(TileState tile) {
   switch (tile) {
@@ -12,8 +12,8 @@ std::optional<BoardState> tileToWinner(TileState tile) {
 }
 
 bool Board::isFull() const {
-  for (int row = 0; row < TTT_NUM_ROWS; row++) {
-    for (int col = 0; col < TTT_NUM_COLS; col++) {
+  for (int row = 0; row < BOARD_NUM_ROWS; row++) {
+    for (int col = 0; col < BOARD_NUM_COLS; col++) {
       if (board[row][col] == TileState::Empty) {
         return false;
       }
@@ -24,15 +24,15 @@ bool Board::isFull() const {
 }
 
 Board::Board() {
-  for (int row = 0; row < TTT_NUM_ROWS; row++) {
-    for (int col = 0; col < TTT_NUM_COLS; col++) {
+  for (int row = 0; row < BOARD_NUM_ROWS; row++) {
+    for (int col = 0; col < BOARD_NUM_COLS; col++) {
       board[row][col] = TileState::Empty;
     }
   }
 }
 
 std::optional<TileState> Board::getTile(uint8_t row, uint8_t col) const {
-  if (row < TTT_NUM_ROWS && col < TTT_NUM_COLS) {
+  if (row < BOARD_NUM_ROWS && col < BOARD_NUM_COLS) {
     return board[row][col];
   }
 
@@ -40,7 +40,7 @@ std::optional<TileState> Board::getTile(uint8_t row, uint8_t col) const {
 }
 
 bool Board::setTile(uint8_t row, uint8_t col, TileState state) {
-  if (row < TTT_NUM_ROWS && col < TTT_NUM_COLS && this->board[row][col] == TileState::Empty) {
+  if (row < BOARD_NUM_ROWS && col < BOARD_NUM_COLS && this->board[row][col] == TileState::Empty) {
     this->board[row][col] = state;
     return true;
   }
@@ -50,9 +50,9 @@ bool Board::setTile(uint8_t row, uint8_t col, TileState state) {
 
 BoardState Board::solveState() const {
   // Check horizontal wins
-  for (uint8_t row = 0; row < TTT_NUM_ROWS; row++) {
+  for (uint8_t row = 0; row < BOARD_NUM_ROWS; row++) {
     TileState currentState = this->board[row][0];
-    for (uint8_t col = 1; col < TTT_NUM_COLS; col++) {
+    for (uint8_t col = 1; col < BOARD_NUM_COLS; col++) {
       if (this->board[row][col] != currentState) {
         currentState = TileState::Empty;
         break;
@@ -65,9 +65,9 @@ BoardState Board::solveState() const {
   }
 
   // Check any vertical wins
-  for (uint8_t col = 0; col < TTT_NUM_COLS; col++) {
+  for (uint8_t col = 0; col < BOARD_NUM_COLS; col++) {
     TileState currentState = this->board[0][col];
-    for (uint8_t row = 1; row < TTT_NUM_ROWS; row++) {
+    for (uint8_t row = 1; row < BOARD_NUM_ROWS; row++) {
       if (this->board[row][col] != currentState) {
         currentState = TileState::Empty;
         break;
