@@ -2,6 +2,7 @@
 
 #include "stm32l4xx_hal.h"
 #include <optional>
+#include <functional>
 
 // Pin definitions
 typedef struct {
@@ -21,7 +22,12 @@ typedef struct {
   uint16_t irqPin;
 } TouchPins;
 
-typedef void (*TouchCallback)(int x, int y);
+using TouchCallback = std::function<void (int x, int y)>;
+
+#define XFAC      663
+#define XOFFSET   (-13)
+#define YFAC      894
+#define YOFFSET   (-30)
 
 // Touchscreen class
 class Touchscreen {
@@ -30,10 +36,12 @@ public:
 
   void init();
   bool isTouched();
-  void readTouch(uint16_t& x, uint16_t& y);
 
   void setCallback(TouchCallback callback);
   void irqHook();
+
+  uint16_t readX();
+  uint16_t readY();
 
 private:
   SPI_HandleTypeDef* touchSpi;
@@ -46,12 +54,12 @@ private:
   void csHigh();
 
   uint8_t spiReadU8();
+  uint16_t spiReadU16();
   void spiRead(TouchPins pins, uint8_t* data, uint16_t size);
+
   void spiWriteU8(uint8_t data);
 
-  uint16_t readTouchX();
-  uint16_t readTouchY();
-
-  static const uint8_t TS_READ_X = 0x90;  // command for reading X position   THESE TWO MAYBE DIFFERENT DEPENDING ON TS CONTROLLER
-  static const uint8_t TS_READ_Y = 0xD0;  //  command for reading Y position
+  void writeU8(uint8_t data);
+  uint16_t readADC(uint8_t cmd);
+  uint16_t readChannel(uint8_t channel);
 };
