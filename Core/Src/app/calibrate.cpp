@@ -10,39 +10,39 @@
 
 #define DEBOUNCE_TIME 10
 
-uint32_t lastPressed = 0;
-Touchscreen* globalTouchscreen = nullptr;
+static uint32_t lastPressed = 0;
+static Touchscreen* globalTouchscreen = nullptr;
 
-extern "C" void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin) {
-  if (GPIO_Pin == TS_IRQ_Pin) {
-    auto now = HAL_GetTick();
-    if (now - lastPressed < DEBOUNCE_TIME) {
-      return;
-    }
+// extern "C" void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin) {
+//   if (GPIO_Pin == TS_IRQ_Pin) {
+//     auto now = HAL_GetTick();
+//     if (now - lastPressed < DEBOUNCE_TIME) {
+//       return;
+//     }
 
-    lastPressed = now;
+//     lastPressed = now;
 
-    if (globalTouchscreen) {
-      globalTouchscreen->irqHook();
-    }
-  }
-}
+//     if (globalTouchscreen) {
+//       globalTouchscreen->irqHook();
+//     }
+//   }
+// }
 
-App::App()
-    : touchscreen((SPI_HandleTypeDef*)nullptr /*&hspi3*/, TouchPins{.clkPort = TS_SCK_GPIO_Port,
-                                                                    .clkPin = TS_SCK_Pin,
+CalibrateApp::CalibrateApp()
+    : touchscreen((SPI_HandleTypeDef*)&hspi3, TouchPins{.clkPort = TS_SCK_GPIO_Port,
+                                                        .clkPin = TS_SCK_Pin,
 
-                                                                    .csPort = TS_CS_GPIO_Port,
-                                                                    .csPin = TS_CS_Pin,
+                                                        .csPort = TS_CS_GPIO_Port,
+                                                        .csPin = TS_CS_Pin,
 
-                                                                    .dinPort = TS_MOSI_GPIO_Port,
-                                                                    .dinPin = TS_MOSI_Pin,
+                                                        .dinPort = TS_MOSI_GPIO_Port,
+                                                        .dinPin = TS_MOSI_Pin,
 
-                                                                    .doPort = TS_MISO_GPIO_Port,
-                                                                    .doPin = TS_MISO_Pin,
+                                                        .doPort = TS_MISO_GPIO_Port,
+                                                        .doPin = TS_MISO_Pin,
 
-                                                                    .irqPort = TS_IRQ_GPIO_Port,
-                                                                    .irqPin = TS_IRQ_Pin}),
+                                                        .irqPort = TS_IRQ_GPIO_Port,
+                                                        .irqPin = TS_IRQ_Pin}),
       lcd(&hspi2, Display::LCDPins{.mosiPin = LCD_MOSI_Pin,
 
                                    .sClkPort = LCD_SCK_GPIO_Port,
@@ -63,26 +63,10 @@ struct CalibrationData {
   int yMax;
 };
 
-void App::run() {
+void CalibrateApp::run() {
   globalTouchscreen = &touchscreen;
 
   touchscreen.init();
-//   touchscreen.setCallback([=](int x, int y) {
-//     if (x < 1 || y < 1 || x > 4094 || y > 4094) {
-//       return;
-//     }
-
-//     float u = (float)x / 4095;
-//     float v = (float)y / 4095;
-
-//     int resolvedX = u * Display::WIDTH;
-//     int resolvedY = v * Display::HEIGHT;
-
-//     uartPrintf("Touch at %d, %d\r\n", x, y);
-
-//     renderer.setColor(Render::RED);
-//     renderer.drawCircleOutline(resolvedX, (resolvedY + 160) % Display::HEIGHT, 2);
-//   });
 
   lcd.init();
 
@@ -134,39 +118,39 @@ void App::run() {
   renderer.setColor(Render::RED);
   renderer.drawRect(0, Display::HEIGHT - 20, 20, 20);
 
-touchscreen.setCallback([&](int x, int y) {
+  touchscreen.setCallback([&](int x, int y) {
     data.xMin = (data.xMin + x) / 2;
     data.yMax = (data.yMax + y) / 2;
     noData = false;
-});
+  });
 
-    while (noData) {
-    }
+  while (noData) {
+  }
 
-    renderer.setColor(Render::GREEN);
-    renderer.drawRect(0, Display::HEIGHT - 20, 20, 20);
+  renderer.setColor(Render::GREEN);
+  renderer.drawRect(0, Display::HEIGHT - 20, 20, 20);
 
-    HAL_Delay(1000);
+  HAL_Delay(1000);
 
-    noData = true;
+  noData = true;
 
-    // Bottom right corner
-    renderer.setColor(Render::RED);
-    renderer.drawRect(Display::WIDTH - 20, 0, 20, 20);
+  // Bottom right corner
+  renderer.setColor(Render::RED);
+  renderer.drawRect(Display::WIDTH - 20, 0, 20, 20);
 
-    touchscreen.setCallback([&](int x, int y) {
-        data.xMax = (data.xMax + x) / 2;
-        data.yMin = (data.yMin + y) / 2;
-        noData = false;
-    });
+  touchscreen.setCallback([&](int x, int y) {
+    data.xMax = (data.xMax + x) / 2;
+    data.yMin = (data.yMin + y) / 2;
+    noData = false;
+  });
 
-    while (noData) {
-    }
+  while (noData) {
+  }
 
-    renderer.setColor(Render::GREEN);
-    renderer.drawRect(Display::WIDTH - 20, 0, 20, 20);
+  renderer.setColor(Render::GREEN);
+  renderer.drawRect(Display::WIDTH - 20, 0, 20, 20);
 
-    HAL_Delay(1000);
+  HAL_Delay(1000);
 
   uartPrintf("Calibration data: %d, %d, %d, %d\r\n", data.xMin, data.xMax, data.yMin, data.yMax);
 

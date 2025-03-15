@@ -23,6 +23,14 @@ bool Board::isFull() const {
   return true;
 }
 
+void Board::clear() {
+  for (int row = 0; row < BOARD_NUM_ROWS; row++) {
+    for (int col = 0; col < BOARD_NUM_COLS; col++) {
+      board[row][col] = TileState::Empty;
+    }
+  }
+}
+
 Board::Board() {
   for (int row = 0; row < BOARD_NUM_ROWS; row++) {
     for (int col = 0; col < BOARD_NUM_COLS; col++) {
@@ -94,7 +102,7 @@ BoardState Board::solveState() const {
     return tileToWinner(this->board[0][2]).value();
   }
 
-  if (this->isFull()) {
+  if (isFull()) {
     return BoardState::Draw;
   }
 

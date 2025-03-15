@@ -15,8 +15,10 @@ private:
     Display::Controller lcd;
     Render::LCDRenderer renderer;
 
+    void reset();
+
     void update();
     void render();
 
-    void renderTile(int row, int col, TileState state);
+    void renderTile(int row, int col, TileState state, TileState tentativeState = TileState::Empty);
 };

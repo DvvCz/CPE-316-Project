@@ -1,5 +1,14 @@
 #pragma once
 
+/*
+  Touchscreen library for the MSP2807
+
+  Baud Rate: 5MBits/s
+  Data Size: 16 Bits
+  Frame Format: Motorola
+  Big Endian (MSB First)
+*/
+
 #include "stm32l4xx_hal.h"
 #include <optional>
 #include <functional>
@@ -24,10 +33,7 @@ typedef struct {
 
 using TouchCallback = std::function<void (int x, int y)>;
 
-#define XFAC      663
-#define XOFFSET   (-13)
-#define YFAC      894
-#define YOFFSET   (-30)
+enum CSMode { Active = 0, Idle = 1 };
 
 // Touchscreen class
 class Touchscreen {
@@ -48,18 +54,18 @@ private:
   TouchPins touchPins;
   std::optional<TouchCallback> callback = std::nullopt;
 
-  void write(uint8_t data);
-  uint8_t read();
-  void csLow();
-  void csHigh();
+  uint16_t currentX;
+  uint16_t currentY;
+
+  void update();
 
   uint8_t spiReadU8();
   uint16_t spiReadU16();
-  void spiRead(TouchPins pins, uint8_t* data, uint16_t size);
 
   void spiWriteU8(uint8_t data);
+  void spiWriteU16(uint16_t data);
 
-  void writeU8(uint8_t data);
-  uint16_t readADC(uint8_t cmd);
-  uint16_t readChannel(uint8_t channel);
+  uint16_t spiTransferU16(uint16_t data);
+
+  void setCSMode(const CSMode mode);
 };

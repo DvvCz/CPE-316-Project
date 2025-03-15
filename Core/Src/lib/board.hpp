@@ -27,6 +27,7 @@ private:
 public:
     Board();
 
+    void clear();
     std::optional<TileState> getTile(uint8_t row, uint8_t col) const;
     bool setTile(uint8_t row, uint8_t col, TileState state);
     BoardState solveState() const;
